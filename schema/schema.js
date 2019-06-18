@@ -9,6 +9,9 @@ const {
   GraphQLList
 } = graphql;
 
+let companiesUrl = 'http://localhost:3000/companies/';
+let usersUrl = 'http://localhost:3000/users/';
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -19,7 +22,7 @@ const UserType = new GraphQLObjectType({
       type: CompanyType,
       resolve(parentValue, args) {
         return axios
-          .get(`http://localhost:3000/companies/${parentValue.companyId}/`)
+          .get(`${companiesUrl}${parentValue.companyId}/`)
           .then(resp => resp.data);
       }
     }
@@ -36,7 +39,7 @@ const CompanyType = new GraphQLObjectType({
       type: GraphQLList(UserType),
       resolve(parentValue, args) {
         return axios
-          .get(`http://localhost:3000/companies/${parentValue.id}/users/`)
+          .get(`${companiesUrl}${parentValue.id}/users/`)
           .then(resp => resp.data);
       }
     }
@@ -52,9 +55,7 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLString }
       },
       resolve(parentValue, args) {
-        return axios
-          .get(`http://localhost:3000/users/${args.id}`)
-          .then(resp => resp.data);
+        return axios.get(`${usersUrl}${args.id}`).then(resp => resp.data);
       }
     },
     company: {
@@ -63,25 +64,19 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLString }
       },
       resolve(parentValue, args) {
-        return axios
-          .get(`http://localhost:3000/companies/${args.id}`)
-          .then(resp => resp.data);
+        return axios.get(`${companiesUrl}${args.id}`).then(resp => resp.data);
       }
     },
     users: {
       type: new GraphQLList(UserType),
       resolve(parent, args) {
-        return axios
-          .get(`http://localhost:3000/users/`)
-          .then(resp => resp.data);
+        return axios.get(`${usersUrl}`).then(resp => resp.data);
       }
     },
     companies: {
       type: new GraphQLList(CompanyType),
       resolve(parent, args) {
-        return axios
-          .get(`http://localhost:3000/companies/`)
-          .then(resp => resp.data);
+        return axios.get(`${companiesUrl}`).then(resp => resp.data);
       }
     }
   }
