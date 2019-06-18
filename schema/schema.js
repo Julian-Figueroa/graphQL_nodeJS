@@ -6,7 +6,8 @@ const {
   GraphQLString,
   GraphQLInt,
   GraphQLSchema,
-  GraphQLList
+  GraphQLList,
+  GraphQLNonNull
 } = graphql;
 
 let companiesUrl = 'http://localhost:3000/companies/';
@@ -82,6 +83,73 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        age: {
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        companyId: {
+          type: GraphQLString
+        }
+      },
+      resolve(parentValue, args) {
+        let user = {
+          firstName: args.firstName,
+          age: args.age,
+          companyId: args.companyId
+        };
+        return axios.post(`${usersUrl}`, user).then(resp => resp.data);
+      }
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve(parentValue, args) {
+        return axios.delete(`${usersUrl}/${args.id}`).then(resp => resp.data);
+      }
+    },
+    editUser: {
+      type: UserType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        firstName: {
+          type: GraphQLString
+        },
+        age: {
+          type: GraphQLInt
+        },
+        companyId: {
+          type: GraphQLString
+        }
+      },
+      resolve(parentValue, args) {
+        let user = {
+          firstName: args.firstName,
+          age: args.age,
+          companyId: args.companyId
+        };
+        return axios
+          .put(`${usersUrl}/${args.id}`, user)
+          .then(resp => resp.data);
+      }
+    }
+  }
+});
+
 module.exports = new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation: Mutation
 });
